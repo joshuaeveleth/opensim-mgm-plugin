@@ -1,24 +1,24 @@
-<Project frameworkVersion="v4_0" name="MOSES.MGM" path="addon-modules/mgmModule/src" type="Library">
+<Project frameworkVersion="v4_0" name="MOSES.MGM" path="addon-modules/mgmModule" type="Library">
     <Configuration name="Debug">
         <Options>
-            <OutputPath>../../../bin/</OutputPath>
+            <OutputPath>../../bin/</OutputPath>
         </Options>
     </Configuration>
     <Configuration name="Release">
         <Options>
-            <OutputPath>../../../bin/</OutputPath>
+            <OutputPath>../../bin/</OutputPath>
         </Options>
     </Configuration>
  
-    <ReferencePath>../../../bin/</ReferencePath>
+    <ReferencePath>../../bin/</ReferencePath>
     <Reference name="System"/>
     <Reference name="OpenSim.Framework"/>
     <Reference name="OpenSim.Region.Framework"/>
     
-    <Reference name="Nini" path="../../../bin/"/>
-    <Reference name="log4net" path="../../../bin/"/>
+    <Reference name="Nini" path="../../bin/"/>
+    <Reference name="log4net" path="../../bin/"/>
     
-    <Reference name="Mono.Addins" path="../../../bin/"/>
+    <Reference name="Mono.Addins" path="../../bin/"/>
  
     <Files>
         <Match pattern="*.cs" recurse="true"/>

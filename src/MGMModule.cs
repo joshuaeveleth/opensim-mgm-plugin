@@ -10,7 +10,9 @@ using Mono.Addins;
 
 
 [assembly: Addin("MGMModule","0.1")]
-[assembly: AddinDependency("OpenSim", OpenSim.VersionInfo.VersionNumber)]
+[assembly: AddinDependency("OpenSim.Region.Framework", OpenSim.VersionInfo.VersionNumber)]
+[assembly: AddinDescription("MOSES Grid Manager Integration")]
+[assembly: AddinAuthor("Michael Heilmann")]
 
 namespace MOSES.MGM
 {
