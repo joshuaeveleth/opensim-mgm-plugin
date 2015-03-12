@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Collections.Concurrent;
 
 namespace MOSES.MGM
 {
@@ -10,18 +11,14 @@ namespace MOSES.MGM
 	public class MGMLink
 	{
 		private IPEndPoint uplink;
-		private TcpClient socket = new TcpClient();
+		private Socket socket;
 		private MGMLog log;
 		private Thread readThread;
 		private Thread writeThread;
 		private Timer connectionTest;
+		private ConcurrentQueue<String> outBox = new ConcurrentQueue<String>();
 		private static int connectionTestIntervalms = 1000;
-		public bool isConnected { 
-			get
-			{
-				return socket.Connected;
-			}
-		}
+		public bool isConnected { get; private set; }
 		
 
 		public MGMLink (IPEndPoint mgmAddress, MGMLog log)
@@ -39,66 +36,87 @@ namespace MOSES.MGM
 
 		public void stop()
 		{
-			//halt the thread
 			connectionTest.Change(Timeout.Infinite,connectionTestIntervalms);
-			//close socket
-			socket.Close();
+			if(socket != null)
+			{
+				socket.Close();
+			}
 		}
 
 		private void timerTick(Object stateInfo)
 		{
-			if(isConnected)
-			{
-				return;
-			}
+			log("Timer Fire");
+			outBox.Enqueue("ping");
+			outBox.Enqueue("pong");
 			try
 			{
-				socket.Connect(uplink);
-				readThread = new Thread(readSocket);
-				readThread.Start();
-				writeThread = new Thread(writeSocket);
-				writeThread.Start();
+				if(socket == null)
+				{
+					log("creating new socket");
+					socket = new Socket(uplink.AddressFamily,SocketType.Stream,ProtocolType.Tcp);
+				}
+				if(! socket.Connected)
+				{
+					log("setting isConnected to true");
+					isConnected = true;
+					log("Reconnecting socket");
+					socket.Disconnect(true);
+					socket.Connect(uplink);
+					readThread = new Thread(readSocket);
+					readThread.Start();
+					writeThread = new Thread(writeSocket);
+					writeThread.Start();
+					log("setting isConnected to true");
+					isConnected = true;
+				}
+				log("Timer Done");
 			} 
 			catch(System.Net.Sockets.SocketException e)
 			{
 				log(String.Format("Error connecting to MGM: {0}", e.Message));
+				isConnected = false;
 			}
 		}
 
 		private void readSocket()
 		{
-			NetworkStream stream = socket.GetStream();
+			log("Read thread start");
 			byte[] buffer = new byte[1024];
 			while(isConnected)
 			{
 				try {
-					int read = stream.Read(buffer, 0, 1024);
-					char[] chars = new char[read / sizeof(char)];
-					System.Buffer.BlockCopy(buffer, 0, chars, 0, read);
-					String msg = new string(chars);
-					log(msg);
+					int read = socket.Receive(buffer, 0, 1024,SocketFlags.None);
+					if(read == 0) continue;
+					String result = System.Text.Encoding.UTF8.GetString(buffer,0,read);
+					log(result);
 				} catch (Exception e){
-					log(String.Format("The socket went away: {0}", e.Message));
-					return;
+					log(String.Format("reader: The socket went away: {0}", e.Message));
+					isConnected = false;
 				}
 			}
+			log("Read Thread Stop");
 		}
 
 		private void writeSocket()
 		{
-			NetworkStream stream = socket.GetStream();
+			log("Write thread start");
 			while(isConnected)
 			{
 				try {
-					String msg = "Test Message!";
+					String msg;
+					if( !outBox.TryDequeue(out msg)){
+						continue;
+					}
 					byte[] bytes = new byte[msg.Length * sizeof(char)];
 					System.Buffer.BlockCopy(msg.ToCharArray(), 0, bytes, 0, bytes.Length);
-					stream.Write(bytes,0,bytes.Length);
+					socket.Send(bytes);
 				} catch (Exception e){
-					log(String.Format("The socket went away: {0}", e.Message));
-					return;
+					log(String.Format("writer: The socket went away: {0}", e.Message));
+					isConnected = false;
+					socket.Disconnect(true);
 				}
 			}
+			log("Write thread stop");
 		}
 	}
 }
