@@ -8,6 +8,7 @@ using OpenSim.Region.Framework.Scenes;
 
 using Mono.Addins;
 
+using System.Net;
 
 [assembly: Addin("MGMModule","0.1")]
 [assembly: AddinDependency("OpenSim.Region.Framework", OpenSim.VersionInfo.VersionNumber)]
@@ -21,6 +22,9 @@ namespace MOSES.MGM
 	{
 		private static ILog m_log;
 		private bool enabled = false;
+		private IPAddress mgmAddress;
+		private int mgmPort;
+		private MGMLink mgmLink;
 
 		public string Name { get { return "MGMModule"; } }
 		public Type ReplaceableInterface { get { return null; } }
@@ -38,6 +42,13 @@ namespace MOSES.MGM
 			if(enabled)
 			{
 				log("Initialising");
+				if(!IPAddress.TryParse(config.GetString("mgmUrl", ""), out mgmAddress))
+				{
+					log("Error parsing mgm url");
+					enabled = false;
+					return;
+				}
+				mgmPort = config.GetInt("mgmPort", 80);
 			} else {
 				log("Disabled");
 			}
@@ -49,18 +60,20 @@ namespace MOSES.MGM
 		{
 			if(!enabled) return;
 			scene.AddCommand("mgm",this,"mgm status","status","Print the status of the MGM module", consoleStatus);
+			mgmLink = new MGMLink(new IPEndPoint(mgmAddress, mgmPort), delegate(string s){log(s);});
+			mgmLink.start();
 		}
 
 		public void RemoveRegion(Scene scene)
 		{
 			if(!enabled) return;
-			log("Remove Scene");
+			mgmLink.stop();
 		}
 
 		public void RegionLoaded(Scene scene)
 		{
 			if(!enabled) return;
-			log("Region Loaded");
+			//I dont think we need this
 		}
 
 		#endregion
@@ -74,7 +87,13 @@ namespace MOSES.MGM
 
 		private void consoleStatus(string module, string[] args)
 		{
-			log("Status Unknown");
+			log(String.Format("MGM url: {0}", mgmAddress));
+			if(mgmLink.isConnected)
+			{
+				log("MGM link is active");
+			} else {
+				log("MGM link is not active");
+			}
 		}
 
 		#endregion
