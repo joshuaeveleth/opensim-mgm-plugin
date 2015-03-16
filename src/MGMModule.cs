@@ -63,6 +63,7 @@ namespace MOSES.MGM
 			mgmLink = new MGMLink(new IPEndPoint(mgmAddress, mgmPort), delegate(string s){log(s);});
 			mgmLink.start();
 			registerEvents(scene.EventManager);
+			mgmLink.send(MGMJson.register(scene.Name));
 		}
 
 		public void RemoveRegion(Scene scene)

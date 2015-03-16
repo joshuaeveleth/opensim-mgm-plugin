@@ -13,7 +13,7 @@ namespace MOSES.MGM
 
 		public static String register(string regionName)
 		{
-			return String.Format("{{\"type\":\"register\",\"name\":{0}}}\n",regionName);
+			return String.Format("{{\"type\":\"register\",\"name\":\"{0}\"}}\n",regionName);
 		}
 	}
 }
