@@ -28,6 +28,10 @@ namespace MOSES.MGM
 			connectionTest = new Timer(timerTick,null,Timeout.Infinite,connectionTestIntervalms);
 		}
 
+		public void send(String message){
+			outBox.Enqueue(message);
+		}
+
 		public void start()
 		{
 			//start our timer thread checking on connection state
@@ -45,9 +49,6 @@ namespace MOSES.MGM
 
 		private void timerTick(Object stateInfo)
 		{
-			log("Timer Fire");
-			outBox.Enqueue("ping");
-			outBox.Enqueue("pong");
 			try
 			{
 				if(socket == null)
@@ -69,7 +70,6 @@ namespace MOSES.MGM
 					log("setting isConnected to true");
 					isConnected = true;
 				}
-				log("Timer Done");
 			} 
 			catch(System.Net.Sockets.SocketException e)
 			{
@@ -107,9 +107,10 @@ namespace MOSES.MGM
 					if( !outBox.TryDequeue(out msg)){
 						continue;
 					}
-					byte[] bytes = new byte[msg.Length * sizeof(char)];
-					System.Buffer.BlockCopy(msg.ToCharArray(), 0, bytes, 0, bytes.Length);
-					socket.Send(bytes);
+					//byte[] bytes = new byte[msg.Length * sizeof(char)];
+					//System.Buffer.BlockCopy(msg.ToCharArray(), 0, bytes, 0, bytes.Length);
+					//socket.Send(bytes);
+					socket.Send(System.Text.Encoding.ASCII.GetBytes(msg));
 				} catch (Exception e){
 					log(String.Format("writer: The socket went away: {0}", e.Message));
 					isConnected = false;

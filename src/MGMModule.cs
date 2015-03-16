@@ -62,6 +62,7 @@ namespace MOSES.MGM
 			scene.AddCommand("mgm",this,"mgm status","status","Print the status of the MGM module", consoleStatus);
 			mgmLink = new MGMLink(new IPEndPoint(mgmAddress, mgmPort), delegate(string s){log(s);});
 			mgmLink.start();
+			registerEvents(scene.EventManager);
 		}
 
 		public void RemoveRegion(Scene scene)
@@ -97,5 +98,15 @@ namespace MOSES.MGM
 		}
 
 		#endregion
+
+		private void registerEvents(EventManager ev)
+		{
+			ev.OnFrame += onFrame;
+		}
+
+		private void onFrame(){
+			String msg = MGMJson.frame();
+			mgmLink.send(msg);
+		}
 	}
 }
