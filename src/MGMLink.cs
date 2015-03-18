@@ -107,9 +107,6 @@ namespace MOSES.MGM
 					if( !outBox.TryDequeue(out msg)){
 						continue;
 					}
-					//byte[] bytes = new byte[msg.Length * sizeof(char)];
-					//System.Buffer.BlockCopy(msg.ToCharArray(), 0, bytes, 0, bytes.Length);
-					//socket.Send(bytes);
 					socket.Send(System.Text.Encoding.ASCII.GetBytes(msg));
 				} catch (Exception e){
 					log(String.Format("writer: The socket went away: {0}", e.Message));

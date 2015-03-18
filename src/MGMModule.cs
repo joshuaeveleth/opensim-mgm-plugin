@@ -59,11 +59,13 @@ namespace MOSES.MGM
 		public void AddRegion(Scene scene)
 		{
 			if(!enabled) return;
+			log("Adding region to MGM");
 			scene.AddCommand("mgm",this,"mgm status","status","Print the status of the MGM module", consoleStatus);
 			mgmLink = new MGMLink(new IPEndPoint(mgmAddress, mgmPort), delegate(string s){log(s);});
 			mgmLink.start();
 			registerEvents(scene.EventManager);
-			mgmLink.send(MGMJson.register(scene.Name));
+			string regMsg = MGMJson.register(scene.Name, scene.RegionInfo.RegionLocX, scene.RegionInfo.RegionLocY, scene.RegionInfo.RegionSizeX);
+			mgmLink.send(regMsg);
 		}
 
 		public void RemoveRegion(Scene scene)
