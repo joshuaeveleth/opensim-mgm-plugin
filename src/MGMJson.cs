@@ -27,7 +27,7 @@ namespace MOSES.MGM
 			return "{" + string.Join(",",args) + "}";
 		}
 
-		public static String frame()
+		public static String Frame()
 		{
 			TimeSpan t = DateTime.Now - new DateTime(1970, 1, 1);
 			int secondsSinceEpoch = (int)t.TotalMilliseconds;
@@ -37,7 +37,7 @@ namespace MOSES.MGM
 			return MGMJson.Encode(msg);
 		}
 
-		public static String register(string regionName, uint locX, uint locY, uint regionSize)
+		public static String Register(string regionName, uint locX, uint locY, uint regionSize)
 		{
 			Dictionary<string,object> msg = new Dictionary<string, object>();
 			msg["type"] = "register";
@@ -45,6 +45,35 @@ namespace MOSES.MGM
 			msg["locX"] = locX;
 			msg["locY"] = locY;
 			msg["size"] = regionSize;
+			return MGMJson.Encode(msg);
+		}
+
+		public static String TextMessage(string sender,string target,int channel,string chatType, string pos,string message)
+		{
+			Dictionary<string,object> msg = new Dictionary<string, object>();
+			msg["type"] = "textMessage";
+			msg["sender"] = sender;
+			msg["target"] = target;
+			msg["channel"] = channel;
+			msg["chatType"] = chatType;
+			msg["pos"] = pos;
+			msg["body"] = message;
+			return MGMJson.Encode(msg);
+		}
+
+		public static String AddAvatar(string uuid)
+		{
+			Dictionary<string,object> msg = new Dictionary<string, object>();
+			msg["type"] = "addAvatar";
+			msg["uuid"] = uuid;
+			return MGMJson.Encode(msg);
+		}
+
+		public static String RemoveAvatar(string uuid)
+		{
+			Dictionary<string,object> msg = new Dictionary<string, object>();
+			msg["type"] = "removeAvatar";
+			msg["uuid"] = uuid;
 			return MGMJson.Encode(msg);
 		}
 	}

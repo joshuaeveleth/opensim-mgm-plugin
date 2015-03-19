@@ -64,7 +64,7 @@ namespace MOSES.MGM
 			mgmLink = new MGMLink(new IPEndPoint(mgmAddress, mgmPort), delegate(string s){log(s);});
 			mgmLink.start();
 			registerEvents(scene.EventManager);
-			string regMsg = MGMJson.register(scene.Name, scene.RegionInfo.RegionLocX, scene.RegionInfo.RegionLocY, scene.RegionInfo.RegionSizeX);
+			string regMsg = MGMJson.Register(scene.Name, scene.RegionInfo.RegionLocX, scene.RegionInfo.RegionLocY, scene.RegionInfo.RegionSizeX);
 			mgmLink.send(regMsg);
 		}
 
@@ -125,7 +125,7 @@ namespace MOSES.MGM
 		}
 
 		private void onFrame(){
-			String msg = MGMJson.frame();
+			String msg = MGMJson.Frame();
 			mgmLink.send(msg);
 		}
 
@@ -133,7 +133,9 @@ namespace MOSES.MGM
 
 		private void onAddAvatar(ScenePresence client)
 		{
-
+			string uuid = client.UUID.ToString();
+			string msg = MGMJson.AddAvatar(uuid);
+			mgmLink.send(msg);
 		}
 
 		private void onAvatarAppearanceChanged(ScenePresence client)
@@ -147,7 +149,10 @@ namespace MOSES.MGM
 		}
 
 		public void onRemoveAvatar(ScenePresence client){	onRemoveAvatar(client.UUID);	}
-		public void onRemoveAvatar(OpenMetaverse.UUID uuid){}
+		public void onRemoveAvatar(OpenMetaverse.UUID uuid){
+			string msg = MGMJson.RemoveAvatar(uuid.ToString());
+			mgmLink.send(msg);
+		}
 
 		#endregion
 	
@@ -171,7 +176,18 @@ namespace MOSES.MGM
 		//only has broadcasts to local chat, not IMs
 		private void onChatBroadcast(object obj, OSChatMessage msg)
 		{
-
+			if(msg.Message == "")
+			{
+				//these messages are generated on keyboard input, and have not data
+				return;
+			}
+			string sender = msg.SenderUUID.ToString();
+			string target = msg.TargetUUID.ToString();
+			string pos = msg.Position.ToString();
+			string msgType = Enum.GetName(typeof(ChatTypeEnum),msg.Type);
+			String message = MGMJson.TextMessage(sender,target,msg.Channel,msgType,pos,msg.Message);
+			log(message);
+			mgmLink.send(message);
 		}
 
 		#endregion
