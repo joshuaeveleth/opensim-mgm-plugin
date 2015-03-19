@@ -105,11 +105,75 @@ namespace MOSES.MGM
 		private void registerEvents(EventManager ev)
 		{
 			ev.OnFrame += onFrame;
+
+			/* Actor Events */
+			ev.OnNewPresence += onAddAvatar;
+			ev.OnRemovePresence += onRemoveAvatar;
+			ev.OnAvatarAppearanceChange += onAvatarAppearanceChanged;
+			ev.OnScenePresenceUpdated += onAvatarPresenceChanged;
+			ev.OnMakeChildAgent += onRemoveAvatar;
+			ev.OnMakeRootAgent += onAddAvatar;
+
+			/* Object Events */
+			ev.OnObjectAddedToScene += onAddObject;
+			ev.OnSceneObjectLoaded += onAddObject;
+			ev.OnObjectBeingRemovedFromScene += onRemoveObject;
+			ev.OnSceneObjectPartUpdated += onUpdateObject;
+
+			/* Chat Events */
+			ev.OnChatFromClient += onChatBroadcast;
 		}
 
 		private void onFrame(){
 			String msg = MGMJson.frame();
 			mgmLink.send(msg);
 		}
+
+		#region ActorEvents
+
+		private void onAddAvatar(ScenePresence client)
+		{
+
+		}
+
+		private void onAvatarAppearanceChanged(ScenePresence client)
+		{
+
+		}
+
+		private void onAvatarPresenceChanged(ScenePresence client)
+		{
+
+		}
+
+		public void onRemoveAvatar(ScenePresence client){	onRemoveAvatar(client.UUID);	}
+		public void onRemoveAvatar(OpenMetaverse.UUID uuid){}
+
+		#endregion
+	
+		#region ObjectEvents
+
+		private void onAddObject(SceneObjectGroup sog)
+		{
+
+		}
+
+		private void onRemoveObject(SceneObjectGroup sog)
+		{
+
+		}
+
+		private void onUpdateObject(SceneObjectPart sop, bool flag)
+		{
+
+		}
+
+		//only has broadcasts to local chat, not IMs
+		private void onChatBroadcast(object obj, OSChatMessage msg)
+		{
+
+		}
+
+		#endregion
 	}
 }
