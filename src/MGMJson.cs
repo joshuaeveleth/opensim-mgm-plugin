@@ -61,6 +61,17 @@ namespace MOSES.MGM
 			return MGMJson.Encode(msg);
 		}
 
+		public static string InstantMessage (string sender, string target, bool isGroup, string message)
+		{
+			Dictionary<string,object> msg = new Dictionary<string, object>();
+			msg["type"] = "InstantMessage";
+			msg["sender"] = sender;
+			msg["target"] = target;
+			msg["isGroup"] = isGroup;
+			msg["body"] = message;
+			return MGMJson.Encode(msg);
+		}
+
 		public static String AddAvatar(string uuid)
 		{
 			Dictionary<string,object> msg = new Dictionary<string, object>();

@@ -17,6 +17,7 @@ namespace MOSES.MGM
 		private Thread writeThread;
 		private Timer connectionTest;
 		private ConcurrentQueue<String> outBox = new ConcurrentQueue<String>();
+		private ConcurrentQueue<String> inBox = new ConcurrentQueue<String>();
 		private static int connectionTestIntervalms = 1000;
 		public bool isConnected { get; private set; }
 		
@@ -89,6 +90,7 @@ namespace MOSES.MGM
 					if(read == 0) continue;
 					String result = System.Text.Encoding.UTF8.GetString(buffer,0,read);
 					log(result);
+					inBox.Enqueue(result);
 				} catch (Exception e){
 					log(String.Format("reader: The socket went away: {0}", e.Message));
 					isConnected = false;

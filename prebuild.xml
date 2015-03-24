@@ -13,7 +13,9 @@
     <ReferencePath>../../bin/</ReferencePath>
     <Reference name="System"/>
     <Reference name="OpenSim.Framework"/>
+    <Reference name="OpenSim.Framework.Monitoring"/>
     <Reference name="OpenSim.Region.Framework"/>
+    <Reference name="OpenSim.Region.ClientStack.LindenUDP"/>
     
     <Reference name="Nini" path="../../bin/"/>
     <Reference name="log4net" path="../../bin/"/>
