@@ -5,6 +5,7 @@ using Nini.Config;
 using OpenSim.Framework;
 using OpenSim.Region.Framework.Interfaces;
 using OpenSim.Region.Framework.Scenes;
+using OpenSim.Region.OptionalModules.World.NPC;
 
 using Mono.Addins;
 
@@ -17,6 +18,8 @@ using System.Net;
 
 namespace MOSES.MGM
 {
+	public delegate void MGMLog(string msg);
+
 	[Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule", Id = "MGMModule")]
 	public class MGMModule : INonSharedRegionModule
 	{
@@ -25,7 +28,9 @@ namespace MOSES.MGM
 		private IPAddress mgmAddress;
 		private int mgmPort;
 		private MGMLink mgmLink;
-		private MGMClient client;
+		private NPCModule npc;
+		private Scene scene;
+		private MGMClientManager mgr;
 
 		public string Name { get { return "MGMModule"; } }
 		public Type ReplaceableInterface { get { return null; } }
@@ -61,12 +66,22 @@ namespace MOSES.MGM
 		{
 			if(!enabled) return;
 			log("Adding region to MGM");
+			npc = (NPCModule)scene.RequestModuleInterface<INPCModule>();
+			if(npc == null || !npc.Enabled)
+			{
+				enabled = false;
+				log("ERROR: NPC module must be enabled for MGM");
+				return;
+			}
 			scene.AddCommand("mgm",this,"mgm status","status","Print the status of the MGM module", consoleStatus);
-			mgmLink = new MGMLink(new IPEndPoint(mgmAddress, mgmPort), delegate(string s){log(s);});
+			scene.AddCommand("mgm",this,"mgm addUser","addUser","Test adding a user", addUser);
+			mgmLink = new MGMLink(new IPEndPoint(mgmAddress, mgmPort), log);
 			mgmLink.start();
 			registerEvents(scene.EventManager);
 			string regMsg = MGMJson.Register(scene.Name, scene.RegionInfo.RegionLocX, scene.RegionInfo.RegionLocY, scene.RegionInfo.RegionSizeX);
 			mgmLink.send(regMsg);
+			this.scene = scene;
+			mgr = new MGMClientManager(scene,log);
 		}
 
 		public void RemoveRegion(Scene scene)
@@ -78,9 +93,7 @@ namespace MOSES.MGM
 		public void RegionLoaded(Scene scene)
 		{
 			if(!enabled) return;
-			log("Adding user manually");
-			client = new MGMClient(scene);
-			scene.AddNewAgent(client, PresenceType.User);
+
 		}
 
 		#endregion
@@ -101,6 +114,17 @@ namespace MOSES.MGM
 			} else {
 				log("MGM link is not active");
 			}
+		}
+
+		private void addUser(string module, string[] args)
+		{
+			log("Adding user manually");
+			OpenMetaverse.UUID guid;
+			MGMClient client = mgr.NewClient(
+				"test","load_0",
+				guid,
+				new OpenMetaverse.Vector3(50,50,50));
+			client.registerCallbacks(this.mgmLink);
 		}
 
 		#endregion
@@ -129,7 +153,6 @@ namespace MOSES.MGM
 			//owner say  //channel say
 			ev.OnChatFromWorld += onChatBroadcast;
 			//IM
-			ev.OnIncomingInstantMessage += onInstantMessage;
 			ev.OnChatFromClient += onChatBroadcast;
 			log("Registered for events");
 		}
@@ -197,18 +220,6 @@ namespace MOSES.MGM
 			string msgType = Enum.GetName(typeof(ChatTypeEnum),msg.Type);
 			String message = MGMJson.TextMessage(sender,target,msg.Channel,msgType,pos,msg.Message);
 			mgmLink.send(message);
-		}
-
-		//IM Messages
-		private void onInstantMessage (GridInstantMessage msg)
-		{
-			log("Instant Message");
-			//string sender = msg.fromAgentID.ToString();
-			//string target = msg.toAgentID.ToString();
-			//bool isGroup = msg.fromGroup;
-			//string body = msg.message;
-			//String message = MGMJson.InstantMessage(sender, target,isGroup,body);
-			//mgmLink.send(message);
 		}
 
 		#endregion

@@ -6,8 +6,6 @@ using System.Collections.Concurrent;
 
 namespace MOSES.MGM
 {
-	public delegate void MGMLog(string msg);
-
 	public class MGMLink
 	{
 		private IPEndPoint uplink;

@@ -61,7 +61,7 @@ namespace MOSES.MGM
 			return MGMJson.Encode(msg);
 		}
 
-		public static string InstantMessage (string sender, string target, bool isGroup, string message)
+		public static string InstantMessage (string sender, string target, int isGroup, string message)
 		{
 			Dictionary<string,object> msg = new Dictionary<string, object>();
 			msg["type"] = "InstantMessage";
