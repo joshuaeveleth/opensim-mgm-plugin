@@ -119,12 +119,12 @@ namespace MOSES.MGM
 		private void addUser(string module, string[] args)
 		{
 			log("Adding user manually");
-			OpenMetaverse.UUID guid;
-			MGMClient client = mgr.NewClient(
-				"test","load_0",
-				guid,
-				new OpenMetaverse.Vector3(50,50,50));
-			client.registerCallbacks(this.mgmLink);
+			//OpenMetaverse.UUID guid;
+			//MGMClient client = mgr.NewClient(
+			//	"test","load_0",
+			//	guid,
+			//	new OpenMetaverse.Vector3(50,50,50));
+			//client.registerCallbacks(this.mgmLink);
 		}
 
 		#endregion
@@ -153,13 +153,15 @@ namespace MOSES.MGM
 			//owner say  //channel say
 			ev.OnChatFromWorld += onChatBroadcast;
 			//IM
-			ev.OnChatFromClient += onChatBroadcast;
+			ev.OnChatBroadcast += onChatBroadcast;
+
 			log("Registered for events");
 		}
 
 		private void onFrame(){
-			String msg = MGMJson.Frame();
-			mgmLink.send(msg);
+			//do not send a message for every frame
+			//String msg = MGMJson.Frame();
+			//mgmLink.send(msg);
 		}
 
 		#region ActorEvents
@@ -188,7 +190,7 @@ namespace MOSES.MGM
 		}
 
 		#endregion
-	
+
 		#region ObjectEvents
 
 		private void onAddObject(SceneObjectGroup sog)
