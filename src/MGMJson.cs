@@ -24,7 +24,7 @@ namespace MOSES.MGM
 				}
 				i++;
 			}
-			return "{" + string.Join(",",args) + "}";
+			return "{" + string.Join(",",args) + "}\n";
 		}
 
 		public static String Frame()
@@ -89,4 +89,3 @@ namespace MOSES.MGM
 		}
 	}
 }
-
