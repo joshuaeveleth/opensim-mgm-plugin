@@ -75,6 +75,7 @@ namespace MOSES.MGM
 			}
 			scene.AddCommand("mgm",this,"mgm status","status","Print the status of the MGM module", consoleStatus);
 			scene.AddCommand("mgm",this,"mgm addUser","addUser","Test adding a user", addUser);
+			scene.AddCommand("mgm",this,"mgm removeUser","removeUser","Test removing a user", removeUser);
 			mgmLink = new MGMLink(new IPEndPoint(mgmAddress, mgmPort), log);
 			mgmLink.start();
 			registerEvents(scene.EventManager);
@@ -82,6 +83,7 @@ namespace MOSES.MGM
 			mgmLink.send(regMsg);
 			this.scene = scene;
 			mgr = new MGMClientManager(scene,log);
+
 		}
 
 		public void RemoveRegion(Scene scene)
@@ -119,13 +121,19 @@ namespace MOSES.MGM
 		private void addUser(string module, string[] args)
 		{
 			log("Adding user manually");
-			//OpenMetaverse.UUID guid;
-			//MGMClient client = mgr.NewClient(
-			//	"test","load_0",
-			//	guid,
-			//	new OpenMetaverse.Vector3(50,50,50));
-			//client.registerCallbacks(this.mgmLink);
+			OpenMetaverse.UUID guid = new OpenMetaverse.UUID("cf86b3be-8c15-4f3b-aa47-2a8589ac46c8");
+			MGMClient client = mgr.NewClient(
+				"test","load_0",
+				guid,
+				new OpenMetaverse.Vector3(50,50,50));
+			client.registerCallbacks(this.mgmLink);
 		}
+
+		private void removeUser(string module, string[] args)
+		{
+			mgr.RemoveClient (new OpenMetaverse.UUID ("cf86b3be-8c15-4f3b-aa47-2a8589ac46c8"));
+		}
+
 
 		#endregion
 
@@ -148,12 +156,11 @@ namespace MOSES.MGM
 			ev.OnSceneObjectPartUpdated += onUpdateObject;
 
 			/* Chat Events */
-			//local chat
 			ev.OnChatFromClient += onChatBroadcast;
-			//owner say  //channel say
 			ev.OnChatFromWorld += onChatBroadcast;
-			//IM
 			ev.OnChatBroadcast += onChatBroadcast;
+
+			ev.OnClientMovement += onAvatarMovement;
 
 			log("Registered for events");
 		}
@@ -181,6 +188,12 @@ namespace MOSES.MGM
 		private void onAvatarPresenceChanged(ScenePresence client)
 		{
 
+		}
+
+		private void onAvatarMovement(ScenePresence client){
+			string uuid = client.UUID.ToString();
+			string msg = MGMJson.AvatarMoved (uuid, client.AbsolutePosition, client.GetWorldRotation(), client.GetWorldVelocity());
+			mgmLink.send(msg);
 		}
 
 		public void onRemoveAvatar(ScenePresence client){	onRemoveAvatar(client.UUID);	}

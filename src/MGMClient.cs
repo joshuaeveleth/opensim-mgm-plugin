@@ -19,6 +19,15 @@ namespace MOSES.MGM
 			this.log = log;
 		}
 
+		public void RemoveClient(UUID agentID){
+			lock (m_avatars) {
+				if(m_avatars.ContainsKey(agentID)){
+					scene.CloseAgent (agentID, true);
+					m_avatars.Remove(agentID);
+				}
+			}
+		}
+
 		public MGMClient NewClient(string firstname, string lastname, UUID agentID, Vector3 position){
 			MGMClient client = null;
 			UUID owner = agentID;
@@ -49,6 +58,7 @@ namespace MOSES.MGM
 			acd.AgentID = client.AgentId;
 			acd.firstname = firstname;
 			acd.lastname = lastname;
+			acd.IPAddress = "0.0.0.0";
 			acd.ServiceURLs = new Dictionary<string, object>();
 
 			AvatarAppearance npcAppearance = new AvatarAppearance();//  (appearance, true);

@@ -14,9 +14,17 @@ namespace MOSES.MGM
 			string[] args = new string[dict.Keys.Count];
 			int i = 0;
 			foreach(KeyValuePair<string,object> entry in dict){
-				if(entry.Value is string)
+				if (entry.Value is string)
 				{
-					args[i] = String.Format("\"{0}\":\"{1}\"",entry.Key, entry.Value);
+					args [i] = String.Format ("\"{0}\":\"{1}\"", entry.Key, entry.Value);
+				}
+				else if (entry.Value is OpenMetaverse.Vector3)
+				{
+					args[i] = String.Format("\"{0}\":\"{1}\"",entry.Key, entry.Value.ToString());
+				}
+				else if (entry.Value is OpenMetaverse.Quaternion)
+				{
+					args[i] = String.Format("\"{0}\":\"{1}\"",entry.Key, entry.Value.ToString());
 				}
 				else
 				{
@@ -64,7 +72,7 @@ namespace MOSES.MGM
 		public static string InstantMessage (string sender, string target, int isGroup, string message)
 		{
 			Dictionary<string,object> msg = new Dictionary<string, object>();
-			msg["type"] = "InstantMessage";
+			msg["type"] = "instantMessage";
 			msg["sender"] = sender;
 			msg["target"] = target;
 			msg["isGroup"] = isGroup;
@@ -85,6 +93,17 @@ namespace MOSES.MGM
 			Dictionary<string,object> msg = new Dictionary<string, object>();
 			msg["type"] = "removeAvatar";
 			msg["uuid"] = uuid;
+			return MGMJson.Encode(msg);
+		}
+
+		public static String AvatarMoved(string uuid, OpenMetaverse.Vector3 position, OpenMetaverse.Quaternion rotation, OpenMetaverse.Vector3 velocity)
+		{
+			Dictionary<string,object> msg = new Dictionary<string, object>();
+			msg ["type"] = "moveAvatar";
+			msg ["uuid"] = uuid;
+			msg ["position"] = position;
+			msg ["rotation"] = rotation;
+			msg ["velocity"] = velocity;
 			return MGMJson.Encode(msg);
 		}
 	}
